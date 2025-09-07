@@ -256,7 +256,11 @@ def main():
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_message))
     print("Бот запущен...")
-    app.run_polling()
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        webhook_url="https://finance-bot-m5g4.onrender.com"
+    )
 
 
 if __name__ == "__main__":

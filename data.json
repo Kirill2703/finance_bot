@@ -1,0 +1,254 @@
+{
+  "card": 1.0099999999999998,
+  "cash": 1174.5500000000002,
+  "history": [
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 21.5,
+      "category": "Другое",
+      "description": "Сигареты",
+      "date": "2025-09-03 21:12"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 16.57,
+      "category": "Питание",
+      "description": "Вафли и бублики",
+      "date": "2025-09-03 21:12"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 5.99,
+      "category": "Другое",
+      "description": "Энергетик",
+      "date": "2025-09-04 08:10"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 87.65,
+      "category": "Питание",
+      "description": "Еда",
+      "date": "2025-09-04 08:11"
+    },
+    {
+      "type": "income",
+      "account": "cash",
+      "amount": 5.99,
+      "category": "Другое",
+      "description": "Энергетик",
+      "date": "2025-09-04 08:11"
+    },
+    {
+      "type": "expense",
+      "account": "card",
+      "amount": 5.99,
+      "category": "Другое",
+      "description": "Энергетик",
+      "date": "2025-09-04 08:11"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 21.5,
+      "category": "Другое",
+      "description": "Сигареты",
+      "date": "2025-09-04 16:51"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 12.81,
+      "category": "Другое",
+      "description": "Вода Марсель + киндер укралденный Марсом🤣",
+      "date": "2025-09-04 16:52"
+    },
+    {
+      "type": "expense",
+      "account": "card",
+      "amount": 4.4,
+      "category": "Транспорт",
+      "description": "Эля проезд",
+      "date": "2025-09-04 16:53"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 21.5,
+      "category": "Другое",
+      "description": "Сигареты",
+      "date": "2025-09-04 20:21"
+    },
+    {
+      "type": "income",
+      "account": "cash",
+      "amount": 304.0,
+      "category": "Зарплата",
+      "description": "Зарплата масами",
+      "date": "2025-09-04 22:16"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 18.69,
+      "category": "Другое",
+      "description": "Пивчанский пиво пивасик",
+      "date": "2025-09-04 22:20"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 28.0,
+      "category": "Другое",
+      "description": "Неправильно посчитали зарплату массами",
+      "date": "2025-09-04 23:15"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 6.58,
+      "category": "Питание",
+      "description": "Вода в зал",
+      "date": "2025-09-05 11:58"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 30.0,
+      "category": "Коммунальные",
+      "description": "Пополнение счета телефона Эля",
+      "date": "2025-09-05 11:59"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 12.76,
+      "category": "Питание",
+      "description": "Кола+печеньки",
+      "date": "2025-09-06 00:08"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 4.5,
+      "category": "Питание",
+      "description": "Чупа чупс и вода",
+      "date": "2025-09-06 00:08"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 67.93,
+      "category": "Питание",
+      "description": "Еда на два дня",
+      "date": "2025-09-06 12:40"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 21.5,
+      "category": "Другое",
+      "description": "Сигареты Элина",
+      "date": "2025-09-06 12:41"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 19.5,
+      "category": "Другое",
+      "description": "Сигареты Кирилл",
+      "date": "2025-09-06 12:41"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 4.4,
+      "category": "Транспорт",
+      "description": "Проезд Эля",
+      "date": "2025-09-06 12:41"
+    },
+    {
+      "type": "income",
+      "account": "cash",
+      "amount": 390.0,
+      "category": "Зарплата",
+      "description": "Эля массами",
+      "date": "2025-09-06 23:18"
+    },
+    {
+      "type": "income",
+      "account": "cash",
+      "amount": 30.0,
+      "category": "Другое",
+      "description": "Хуй знает откуда",
+      "date": "2025-09-06 23:20"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 8.8,
+      "category": "Транспорт",
+      "description": "Эля транспорт",
+      "date": "2025-09-07 11:38"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 8.8,
+      "category": "Транспорт",
+      "description": "Проезд",
+      "date": "2025-09-07 11:39"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 21.47,
+      "category": "Питание",
+      "description": "Марсик лизак + сок, булки к супу и кола",
+      "date": "2025-09-07 11:39"
+    },
+    {
+      "type": "income",
+      "account": "cash",
+      "amount": 8.8,
+      "category": "Другое",
+      "description": "Возврат прокзда",
+      "date": "2025-09-07 11:39"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 8.8,
+      "category": "Питание",
+      "description": "Мивина молоко",
+      "date": "2025-09-07 10:30"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 22.5,
+      "category": "Другое",
+      "description": "Сигареты Эля",
+      "date": "2025-09-07 17:52"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 31.5,
+      "category": "Питание",
+      "description": "Фрукты рынок",
+      "date": "2025-09-07 17:52"
+    },
+    {
+      "type": "expense",
+      "account": "cash",
+      "amount": 10.99,
+      "category": "Питание",
+      "description": "Эля бублини",
+      "date": "2025-09-07 17:52"
+    }
+  ]
+}

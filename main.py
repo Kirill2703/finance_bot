@@ -267,8 +267,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- Запуск бота ---
 
 
+async def delete_webhook(application):
+    await application.bot.delete_webhook(drop_pending_updates=True)
+
+
 def main():
     app = Application.builder().token(TOKEN).build()
+    app.post_init = delete_webhook
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("balance", balance))
     app.add_handler(CommandHandler("setbalance", setbalance))

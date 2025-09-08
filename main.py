@@ -1,4 +1,5 @@
 import os
+import psycopg2
 import json
 from datetime import datetime
 from dotenv import load_dotenv
@@ -7,21 +8,49 @@ from telegram.ext import Application, CommandHandler, MessageHandler, ContextTyp
 
 DATA_FILE = "data.json"
 
-# Загружаем данные или создаём новый файл
+# --- Загрузка старых данных ---
 try:
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
 except FileNotFoundError:
     data = {"card": 0.0, "cash": 0.0, "history": []}
 
-
-def save_data():
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-# Загружаем токен из .env
+# --- Подключение к PostgreSQL ---
 load_dotenv()
+conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+cursor = conn.cursor()
+
+# Создаем таблицу, если еще нет
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS finance (
+    id SERIAL PRIMARY KEY,
+    account TEXT,
+    type TEXT,
+    category TEXT,
+    amount NUMERIC,
+    description TEXT,
+    date TIMESTAMP
+);
+""")
+conn.commit()
+
+# --- Мигрируем старые данные из data.json в БД ---
+if data.get("history"):
+    for op in data["history"]:
+        cursor.execute("""
+        INSERT INTO finance (account, type, category, amount, description, date)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT DO NOTHING;
+        """, (op["account"], op["type"], op["category"], op["amount"], op["description"], op["date"]))
+    conn.commit()
+
+# --- Загружаем текущие балансы ---
+cursor.execute("SELECT account, SUM(amount) FROM finance GROUP BY account;")
+rows = cursor.fetchall()
+balances = {"card": 0.0, "cash": 0.0}
+for row in rows:
+    balances[row[0]] = float(row[1])
+
 TOKEN = os.getenv("BOT_TOKEN")
 
 # --- Категории ---
@@ -46,17 +75,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def clear_history(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data["history"] = []
-    save_data()
+    cursor.execute("DELETE FROM finance;")
+    conn.commit()
+    balances["card"] = 0.0
+    balances["cash"] = 0.0
     await update.message.reply_text("История очищена ✅")
 
 
-
 async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    total = data["card"] + data["cash"]
+    total = balances["card"] + balances["cash"]
     await update.message.reply_text(
-        f"💳 Карта: {data['card']:.2f} zł\n"
-        f"💵 Наличные: {data['cash']:.2f} zł\n"
+        f"💳 Карта: {balances['card']:.2f} zł\n"
+        f"💵 Наличные: {balances['cash']:.2f} zł\n"
         f"💰 Общий: {total:.2f} zł"
     )
 
@@ -71,9 +101,15 @@ async def setbalance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except ValueError:
         await update.message.reply_text("Сумма должна быть числом!")
         return
-    if acc in data:
-        data[acc] = amount
-        save_data()
+    if acc in balances:
+        cursor.execute("DELETE FROM finance WHERE account=%s;", (acc,))
+        cursor.execute(
+            "INSERT INTO finance (account, type, category, amount, description, date) VALUES (%s, %s, %s, %s, %s, %s);",
+            (acc, "setbalance", "init", amount,
+             "Установлен баланс", datetime.now())
+        )
+        conn.commit()
+        balances[acc] = amount
         await update.message.reply_text(f"Баланс {acc} установлен на {amount:.2f} zł")
     else:
         await update.message.reply_text("Доступные счета: card, cash")
@@ -103,8 +139,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             try:
                 amount = float(text.replace(",", "."))
                 acc = context.user_data["account"]
-                data[acc] = amount
-                save_data()
+                cursor.execute("DELETE FROM finance WHERE account=%s;", (acc,))
+                cursor.execute(
+                    "INSERT INTO finance (account, type, category, amount, description, date) VALUES (%s, %s, %s, %s, %s, %s);",
+                    (acc, "setbalance", "init", amount,
+                     "Установлен баланс", datetime.now())
+                )
+                conn.commit()
+                balances[acc] = amount
                 await update.message.reply_text(f"Баланс {acc} установлен на {amount:.2f} zł")
                 context.user_data.clear()
                 reply_markup = ReplyKeyboardMarkup(
@@ -116,12 +158,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # --- Главное меню ---
     if text == "📊 Баланс":
-        total = data["card"] + data["cash"]
-        await update.message.reply_text(
-            f"💳 Карта: {data['card']:.2f} zł\n"
-            f"💵 Наличные: {data['cash']:.2f} zł\n"
-            f"💰 Общий: {total:.2f} zł"
-        )
+        await balance(update, context)
         return
 
     elif text == "⚙️ Установить баланс":
@@ -167,16 +204,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     elif text == "📜 История":
-        last_operations = data.get("history", [])[-10:]
+        cursor.execute(
+            "SELECT date, type, account, category, amount, description FROM finance ORDER BY id DESC LIMIT 10;")
+        last_operations = cursor.fetchall()
         if not last_operations:
             await update.message.reply_text("История пуста.")
         else:
             msg = ""
-            for op in last_operations:
-                if isinstance(op, dict):
-                    msg += f"{op['date']} | {op['type']} | {op['account']} | {op['category']} | {op['amount']:.2f} zł | {op['description']}\n"
-                else:
-                    msg += str(op) + "\n"
+            for op in reversed(last_operations):
+                msg += f"{op[0]} | {op[1]} | {op[2]} | {op[3]} | {op[4]:.2f} zł | {op[5]}\n"
             await update.message.reply_text(msg)
         return
 
@@ -214,7 +250,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Введите число!")
         return
 
-    # --- Ввод описания ---
+    # --- Ввод описания и сохранение ---
     if context.user_data.get("action") in ["income", "expense"] and "category" in context.user_data and "amount" in context.user_data:
         if text == "🔙 Назад":
             context.user_data.pop("amount", None)
@@ -222,23 +258,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
             await update.message.reply_text("Введите сумму:", reply_markup=reply_markup)
             return
-        # сохраняем операцию
         description = text
         acc = context.user_data["account"]
         amount = context.user_data["amount"]
         op_type = context.user_data["action"]
         category = context.user_data["category"]
-        date = datetime.now().strftime("%Y-%m-%d %H:%M")
-        data[acc] += amount if op_type == "income" else -amount
-        data["history"].append({
-            "type": op_type,
-            "account": acc,
-            "amount": amount,
-            "category": category,
-            "description": description,
-            "date": date
-        })
-        save_data()
+        date = datetime.now()
+        cursor.execute("INSERT INTO finance (account, type, category, amount, description, date) VALUES (%s, %s, %s, %s, %s, %s);",
+                       (acc, op_type, category, amount if op_type == "income" else -amount, description, date))
+        conn.commit()
+        balances[acc] += amount if op_type == "income" else -amount
         await update.message.reply_text(f"{op_type.title()} {amount:.2f} zł добавлен в {acc}")
         context.user_data.clear()
         reply_markup = ReplyKeyboardMarkup(keyboard_main, resize_keyboard=True)
